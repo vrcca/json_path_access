@@ -7,7 +7,7 @@ This library converts JSONPath expressions into Access list. This is really usef
 
 Assuming we have this JSON:
 ```json
-json = {
+{
   "store": {
     "book": [
       {
