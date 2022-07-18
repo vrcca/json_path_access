@@ -5,11 +5,19 @@ defmodule JsonPathAccess.Parser do
 
   name = ascii_string([?A..?Z, ?a..?z, ?_], min: 1)
 
+  name_first = ascii_string([?A..?Z, ?a..?z, ?_], min: 1)
+  name_char = ascii_string([?A..?Z, ?a..?z, ?0..?9], min: 1)
+
+  dot_member_name =
+    name_first
+    |> optional(name_char)
+    |> reduce({Enum, :join, []})
+
   dot_selector =
     ignore(string("."))
-    |> concat(name)
+    |> concat(dot_member_name)
 
-  wildcard_dot_selector =
+  dot_wildcard_selector =
     ignore(string(".*"))
     |> post_traverse({:all, []})
 
@@ -17,7 +25,7 @@ defmodule JsonPathAccess.Parser do
     ignore(string("[*]"))
     |> post_traverse({:all, []})
 
-  wildcard_selector = choice([wildcard_index_selector, wildcard_dot_selector])
+  wildcard_selector = choice([wildcard_index_selector, dot_wildcard_selector])
 
   object_name_selector =
     ignore(string("['"))
