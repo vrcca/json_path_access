@@ -25,10 +25,17 @@ defmodule JsonPathAccess.Parser do
 
   wildcard_selector = choice([wildcard_index_selector, dot_wildcard_selector])
 
-  quoted_name_selector =
+  double_quoted_name_selector =
+    ignore(string("[\""))
+    |> utf8_string([?A..?Z, ?a..?z, ?_, ?\s, ?.], min: 1)
+    |> ignore(string("\"]"))
+
+  single_quoted_name_selector =
     ignore(string("['"))
     |> utf8_string([?A..?Z, ?a..?z, ?_, ?\s, ?.], min: 1)
     |> ignore(string("']"))
+
+  quoted_selector = choice([single_quoted_name_selector, double_quoted_name_selector])
 
   element_index_selector =
     ignore(string("["))
@@ -39,7 +46,7 @@ defmodule JsonPathAccess.Parser do
     |> map({String, :to_integer, []})
     |> map({Access, :at, []})
 
-  index_selector = choice([quoted_name_selector, element_index_selector])
+  index_selector = choice([quoted_selector, element_index_selector])
 
   filters =
     ignore(string("[?("))
