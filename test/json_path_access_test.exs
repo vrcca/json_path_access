@@ -19,6 +19,7 @@ defmodule JsonPathAccessTest do
   test "converts bracket notation" do
     assert ["property", "nested"] == JsonPathAccess.to_access("$['property']['nested']")
     assert ["Property", "neSt_ed"] == JsonPathAccess.to_access("$['Property']['neSt_ed']")
+    assert ["Pro perty", "neSt.ed"] == JsonPathAccess.to_access("$['Pro perty']['neSt.ed']")
   end
 
   test "converts a mix of dot and bracket notation" do
