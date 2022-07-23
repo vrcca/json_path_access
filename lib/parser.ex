@@ -1,7 +1,14 @@
 defmodule JsonPathAccess.Parser do
   import NimbleParsec
 
+  space = string(" ")
   root = string("$")
+
+  number =
+    optional(string("-"))
+    |> integer(min: 1)
+    |> reduce({Enum, :join, []})
+    |> map({String, :to_integer, []})
 
   name_first = ascii_string([?A..?Z, ?a..?z, ?_], min: 1)
   name_char = ascii_string([?A..?Z, ?a..?z, ?0..?9], min: 1)
@@ -39,27 +46,54 @@ defmodule JsonPathAccess.Parser do
 
   element_index_selector =
     ignore(string("["))
-    |> optional(string("-"))
-    |> integer(min: 1)
+    |> concat(number)
     |> ignore(string("]"))
-    |> reduce({Enum, :join, []})
-    |> map({String, :to_integer, []})
     |> map({Access, :at, []})
 
   index_selector = choice([quoted_selector, element_index_selector])
 
-  filters =
-    ignore(string("[?("))
-    |> utf8_string([], min: 1)
-    |> ignore(string(")]"))
+  start_index = number
+  end_index = number
+  step = number
+
+  slice_index =
+    optional(start_index |> ignore(optional(space)))
+    |> ignore(string(":"))
+    |> ignore(optional(space))
+    |> optional(end_index |> ignore(optional(space)))
+    |> optional(ignore(string(":")) |> optional(ignore(optional(space)) |> concat(step)))
+
+  array_slice_selector =
+    ignore(string("["))
+    |> ignore(optional(space))
+    |> concat(slice_index)
+    |> ignore(string("]"))
+    |> post_traverse({:slice, []})
 
   json_path =
     ignore(root)
-    |> concat(repeat(choice([dot_selector, wildcard_selector, index_selector, filters])))
+    |> concat(
+      repeat(choice([dot_selector, wildcard_selector, index_selector, array_slice_selector]))
+    )
 
   defparsec(:parse, json_path, debug: true)
 
   defp all(_rest, _args = [], context, _line, _offset) do
     {[Access.all()], context}
+  end
+
+  defp slice(rest, args = [_end_index, _start_index], context, line, offset) do
+    slice(rest, [1 | args], context, line, offset)
+  end
+
+  defp slice(_rest, [step, end_index, start_index], context, _line, _offset) do
+    range =
+      if step >= 0 do
+        JsonPathAccess.Access.slice(start_index, end_index - 1, step)
+      else
+        JsonPathAccess.Access.slice(start_index, end_index, step)
+      end
+
+    {[range], context}
   end
 end

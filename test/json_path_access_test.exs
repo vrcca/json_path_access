@@ -36,4 +36,10 @@ defmodule JsonPathAccessTest do
     assert ["property", Access.at(1)] == JsonPathAccess.to_access("$.property[1]")
     assert ["last", Access.at(-1)] == JsonPathAccess.to_access("$.last[-1]")
   end
+
+  test "converts array slices" do
+    assert [JsonPathAccess.Access.slice(1, 2, 1)] == JsonPathAccess.to_access("$[1:3]")
+    assert [JsonPathAccess.Access.slice(1, 4, 1)] == JsonPathAccess.to_access("$[1:5:1]")
+    assert [JsonPathAccess.Access.slice(5, 1, -1)] == JsonPathAccess.to_access("$[5:1:-1]")
+  end
 end
