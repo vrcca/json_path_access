@@ -11,7 +11,7 @@ defmodule JsonPathAccess.Access do
     next.(Enum.slice(data, range))
   end
 
-  defp slice(:get_and_update, data, %Range{first: first, last: last, step: _step} = range, next) do
+  defp slice(:get_and_update, data, %Range{first: first, last: last} = range, next) do
     slice = Enum.slice(data, range)
 
     case next.(slice) do
