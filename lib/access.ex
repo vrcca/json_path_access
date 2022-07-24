@@ -16,30 +16,11 @@ defmodule JsonPathAccess.Access do
 
     case next.(slice) do
       :pop ->
-        # TODO: respect indexes from range
-        {slice, data -- slice}
+        {slice, JsonPathAccess.Enum.drop_slice(data, range)}
 
       {get, changes} ->
-        changes = merge(data, changes, range)
-
+        changes = JsonPathAccess.Enum.merge(data, changes, range)
         {get, changes}
     end
-  end
-
-  def merge(data, changes, range) do
-    begin = if(range.first >= 0, do: 0, else: length(data))
-
-    {_index, acc, _current} =
-      for element <- data, reduce: {0, [], changes} do
-        {index, acc, changes} ->
-          if (index - begin) in range do
-            [head | tail] = changes
-            {index + 1, [head | acc], tail}
-          else
-            {index + 1, [element | acc], changes}
-          end
-      end
-
-    Enum.reverse(acc)
   end
 end

@@ -36,6 +36,7 @@ defmodule JsonPathAccess.AccessTest do
       list = ~w(a b c d e f g)
       assert {~w(a c e), ~w(b d f g)} == pop_in(list, [Access.slice(0..4//2)])
       assert {~w(b), ~w(a c d e f g)} == pop_in(list, [Access.slice(1..2//2)])
+      assert {~w(c d), ~w(c b e f g)} == pop_in(~w(c b c d e f g), [Access.slice(2..3)])
     end
 
     test "updates range from the start of the list" do
@@ -53,15 +54,6 @@ defmodule JsonPathAccess.AccessTest do
     test "updates  a range with steps" do
       list = ~w(a b c d e f g)
       assert ~w(A b C d E f g) == update_in(list, [Access.slice(0..4//2)], &upcase_items/1)
-    end
-  end
-
-  describe "merge/3" do
-    test "merge list into another using range" do
-      list = ~w(a b c)
-      another_list = ~w(B)
-      range = 1..2//2
-      assert ~w(a B c) == Access.merge(list, another_list, range)
     end
   end
 
