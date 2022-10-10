@@ -38,8 +38,8 @@ defmodule JsonPathAccessTest do
   end
 
   test "converts array slices" do
-    assert [JsonPathAccess.Access.slice(1, 2, 1)] == JsonPathAccess.to_access("$[1:3]")
-    assert [JsonPathAccess.Access.slice(1, 4, 1)] == JsonPathAccess.to_access("$[1:5:1]")
-    assert [JsonPathAccess.Access.slice(5, 1, -1)] == JsonPathAccess.to_access("$[5:1:-1]")
+    assert [Access.slice(1..2//1)] == JsonPathAccess.to_access("$[1:3]")
+    assert [Access.slice(1..4//1)] == JsonPathAccess.to_access("$[1:5:1]")
+    assert_raise ArgumentError, fn -> JsonPathAccess.to_access("$[5:1:-1]") end
   end
 end
