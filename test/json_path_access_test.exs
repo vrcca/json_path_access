@@ -47,5 +47,8 @@ defmodule JsonPathAccessTest do
     list = ~w(a b c d e f g)
     assert ~w(b d b g) == get_in(list, JsonPathAccess.to_access("$[1, 3, 1, -1]"))
     assert ["b", ["b", "c", "d"], "f"] == get_in(list, JsonPathAccess.to_access("$[1, 1:4, -2]"))
+
+    assert ~w(a B c D e f G) ==
+             update_in(list, JsonPathAccess.to_access("$[1, 3, -1]"), &String.upcase/1)
   end
 end

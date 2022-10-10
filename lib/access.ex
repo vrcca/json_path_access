@@ -24,18 +24,24 @@ defmodule JsonPathAccess.Access do
     end
   end
 
-  def combine(functions) do
-    fn op, data, next -> combine(op, data, functions, next) end
+  def combine(funs) do
+    fn op, data, next -> combine(op, data, funs, next) end
   end
 
-  defp combine(:get, data, functions, next) do
-    Enum.map(functions, fn function ->
-      function.(:get, data, next)
+  defp combine(:get, data, funs, next) do
+    Enum.map(funs, fn fun ->
+      fun.(:get, data, next)
     end)
     |> next.()
   end
 
-  defp combine(:get_and_update, _data, _functions, _next) do
-    raise "get_and_update not implemented for combined Access functions."
+  defp combine(:get_and_update, data, funs, next) do
+    {gets, update} =
+      Enum.reduce(funs, {[], data}, fn fun, {gets, update} ->
+        {new_gets, new_update} = fun.(:get_and_update, update, next)
+        {[new_gets | gets], new_update}
+      end)
+
+    {:lists.reverse(gets), update}
   end
 end
