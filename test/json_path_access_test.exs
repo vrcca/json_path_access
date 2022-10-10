@@ -42,4 +42,10 @@ defmodule JsonPathAccessTest do
     assert [JsonPathAccess.Access.slice(1, 4, 1)] == JsonPathAccess.to_access("$[1:5:1]")
     assert [JsonPathAccess.Access.slice(5, 1, -1)] == JsonPathAccess.to_access("$[5:1:-1]")
   end
+
+  test "converts list selectors" do
+    list = ~w(a b c d e f g)
+    assert ~w(b d b g) == get_in(list, JsonPathAccess.to_access("$[1, 3, 1, -1]"))
+    assert ["b", ["b", "c", "d"], "f"] == get_in(list, JsonPathAccess.to_access("$[1, 1:4, -2]"))
+  end
 end
