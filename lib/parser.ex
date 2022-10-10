@@ -87,6 +87,6 @@ defmodule JsonPathAccess.Parser do
   end
 
   defp slice(_rest, [step, end_index, start_index], context, _line, _offset) do
-    {[Access.slice(start_index..end_index-1//step)], context}
+    {[Access.slice(start_index..(end_index - 1)//step)], context}
   end
 end
