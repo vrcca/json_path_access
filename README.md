@@ -82,8 +82,9 @@ This library attempts to implement this version of the spec: https://www.ietf.or
 - [x] Dot Wildcard Selector
 - [x] Index Selector
 - [x] Index Wildcard Selector
+- [x] Array Slice Selector
+  - Note: Currently there is no support for negative steps.
 - [ ] Filter Selector
-- [ ] Array Slice Selector
 - [ ] Descendant Selector
 - [ ] List Selector
 
