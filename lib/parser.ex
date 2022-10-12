@@ -33,24 +33,25 @@ defmodule JsonPathAccess.Parser do
   wildcard_selector = choice([wildcard_index_selector, dot_wildcard_selector])
 
   double_quoted_name_selector =
-    ignore(string("[\""))
+    ignore(string("\""))
     |> utf8_string([?A..?Z, ?a..?z, ?_, ?\s, ?.], min: 1)
-    |> ignore(string("\"]"))
+    |> ignore(string("\""))
 
   single_quoted_name_selector =
-    ignore(string("['"))
+    ignore(string("'"))
     |> utf8_string([?A..?Z, ?a..?z, ?_, ?\s, ?.], min: 1)
-    |> ignore(string("']"))
+    |> ignore(string("'"))
 
-  quoted_selector = choice([single_quoted_name_selector, double_quoted_name_selector])
+  quoted_selector =
+    ignore(optional(space))
+    |> choice([single_quoted_name_selector, double_quoted_name_selector])
+    |> ignore(optional(string(",")))
 
   element_index_selector =
-    ignore(string("["))
+    ignore(optional(space))
     |> concat(number)
-    |> ignore(string("]"))
+    |> ignore(optional(string(",")))
     |> map({Access, :at, []})
-
-  index_selector = choice([quoted_selector, element_index_selector])
 
   start_index = number
   end_index = number
@@ -64,17 +65,20 @@ defmodule JsonPathAccess.Parser do
     |> optional(ignore(string(":")) |> optional(ignore(optional(space)) |> concat(step)))
 
   array_slice_selector =
-    ignore(string("["))
-    |> ignore(optional(space))
+    ignore(optional(space))
     |> concat(slice_index)
-    |> ignore(string("]"))
+    |> ignore(optional(string(",")))
     |> post_traverse({:slice, []})
+
+  list_selector =
+    ignore(string("["))
+    |> repeat(choice([quoted_selector, array_slice_selector, element_index_selector]))
+    |> ignore(string("]"))
+    |> post_traverse({:combine, []})
 
   json_path =
     ignore(root)
-    |> concat(
-      repeat(choice([dot_selector, wildcard_selector, index_selector, array_slice_selector]))
-    )
+    |> concat(repeat(choice([dot_selector, wildcard_selector, list_selector])))
 
   defparsec(:parse, json_path, debug: true)
 
@@ -88,5 +92,13 @@ defmodule JsonPathAccess.Parser do
 
   defp slice(_rest, [step, end_index, start_index], context, _line, _offset) do
     {[Access.slice(start_index..(end_index - 1)//step)], context}
+  end
+
+  defp combine(_rest, args = [_single_arg], context, _line, _offset) do
+    {args, context}
+  end
+
+  defp combine(_rest, args, context, _line, _offset) do
+    {[JsonPathAccess.Access.combine(Enum.reverse(args))], context}
   end
 end
