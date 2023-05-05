@@ -82,7 +82,7 @@ defmodule JsonPathAccess.Parser do
     ignore(root)
     |> concat(repeat(choice([dot_selector, wildcard_selector, list_selector])))
 
-  defparsec(:parse, json_path, debug: true)
+  defparsec(:parse, json_path, debug: false)
 
   defp all(_rest, _args = [], context, _line, _offset) do
     {[Access.all()], context}
