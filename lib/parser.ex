@@ -1,4 +1,6 @@
 defmodule JsonPathAccess.Parser do
+  @moduledoc false
+
   import NimbleParsec
 
   space = string(" ")

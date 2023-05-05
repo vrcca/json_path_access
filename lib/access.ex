@@ -1,4 +1,6 @@
 defmodule JsonPathAccess.Access do
+  @moduledoc false
+
   def combine(funs) do
     fn op, data, next -> combine(op, data, funs, next) end
   end
