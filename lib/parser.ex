@@ -12,8 +12,11 @@ defmodule JsonPathAccess.Parser do
     |> reduce({Enum, :join, []})
     |> map({String, :to_integer, []})
 
-  name_first = ascii_string([?A..?Z, ?a..?z, ?_], min: 1)
-  name_char = ascii_string([?A..?Z, ?a..?z, ?0..?9], min: 1)
+  unicode = 0x80..0x10FFFF
+  alpha = [?A..?Z, ?a..?z]
+  digit = ?0..?9
+  name_first = utf8_string([?_, unicode | alpha], min: 1)
+  name_char = choice([ascii_string([digit], min: 1), name_first])
 
   dot_member_name =
     name_first
