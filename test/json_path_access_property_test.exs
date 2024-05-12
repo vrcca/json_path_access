@@ -10,6 +10,21 @@ defmodule JsonPathAccessPropertyTest do
     end
   end
 
+  property "all dot wildcards selectors are returned as Access.all/1" do
+    check all fields <- list_of(one_of([dot_member_name(), dot_wild_selector()]), min_length: 1) do
+      dotted_fields = Enum.join(fields, ".")
+      path = "$.#{dotted_fields}"
+
+      expected_fields =
+        Enum.map(fields, fn
+          "*" -> Access.all()
+          field -> field
+        end)
+
+      assert expected_fields == JsonPathAccess.to_access(path)
+    end
+  end
+
   # dot-selector    = "." dot-member-name
   # dot-member-name = name-first *name-char
   # name-first      =
@@ -46,5 +61,10 @@ defmodule JsonPathAccessPropertyTest do
 
   defp digit do
     string(?0..?9)
+  end
+
+  # dot-wild-selector    = "." "*"            ;  dot followed by asterisk
+  defp dot_wild_selector do
+    constant("*")
   end
 end

@@ -16,7 +16,7 @@ defmodule JsonPathAccess.Parser do
   alpha = [?A..?Z, ?a..?z]
   digit = ?0..?9
   name_first = utf8_string([?_, unicode | alpha], min: 1)
-  name_char = choice([ascii_string([digit], min: 1), name_first])
+  name_char = choice([utf8_string([digit], min: 1), name_first])
 
   dot_member_name =
     name_first
