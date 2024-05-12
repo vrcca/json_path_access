@@ -8,7 +8,7 @@ defmodule JsonPathAccessTest do
     assert ["property", "nested"] == JsonPathAccess.to_access("$.property.nested")
     assert ["Property", "nest_Ed"] == JsonPathAccess.to_access("$.Property.nest_Ed")
     assert ["number1"] == JsonPathAccess.to_access("$.number1")
-    assert_raise MatchError, fn -> JsonPathAccess.to_access("$.1number") end
+    assert :error = JsonPathAccess.to_access("$.1number")
   end
 
   test "converts dot wildcard notation" do

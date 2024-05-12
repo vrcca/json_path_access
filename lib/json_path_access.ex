@@ -6,8 +6,12 @@ defmodule JsonPathAccess do
   You can find the specification here: https://www.ietf.org/archive/id/draft-ietf-jsonpath-base-05.html
   """
   def to_access(exp) do
-    {:ok, matches, "", _map, _tuple, _integer} = JsonPathAccess.Parser.parse(exp)
+    {:ok, matches, return, _map, _tuple, _integer} = JsonPathAccess.Parser.parse(exp)
 
-    matches
+    if return == "" do
+      matches
+    else
+      :error
+    end
   end
 end
