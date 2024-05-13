@@ -34,7 +34,7 @@ defmodule JsonPathAccess.MixProject do
     [
       {:nimble_parsec, "~> 1.4"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-      {:stream_data, "~> 0.6", only: [:dev, :test]}
+      {:stream_data, "~> 1.0", only: [:dev, :test]}
     ]
   end
 end
