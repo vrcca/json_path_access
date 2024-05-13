@@ -3,22 +3,21 @@ defmodule JsonPathAccessPropertyTest do
   use ExUnitProperties
 
   property "passing a dot selector returns the list of fields" do
-    check all fields <- list_of(dot_member_name(), min_length: 1) do
-      dotted_fields = Enum.join(fields, ".")
-      path = "$.#{dotted_fields}"
-      assert fields == JsonPathAccess.to_access(path)
+    check all fields <- list_of(dot_selector(), min_length: 1) do
+      path = "$#{Enum.join(fields)}"
+      expected_fields = Enum.map(fields, fn "." <> name -> name end)
+      assert expected_fields == JsonPathAccess.to_access(path)
     end
   end
 
   property "all dot wildcards selectors are returned as Access.all/1" do
-    check all fields <- list_of(one_of([dot_member_name(), dot_wild_selector()]), min_length: 1) do
-      dotted_fields = Enum.join(fields, ".")
-      path = "$.#{dotted_fields}"
+    check all fields <- list_of(one_of([dot_selector(), dot_wild_selector()]), min_length: 1) do
+      path = "$#{Enum.join(fields)}"
 
       expected_fields =
         Enum.map(fields, fn
-          "*" -> Access.all()
-          field -> field
+          ".*" -> Access.all()
+          "." <> name -> name
         end)
 
       assert expected_fields == JsonPathAccess.to_access(path)
@@ -35,11 +34,11 @@ defmodule JsonPathAccessPropertyTest do
 
   # DIGIT           =  %x30-39              ; 0-9
   # ALPHA           =  %x41-5A / %x61-7A    ; A-Z / a-z
-  defp dot_member_name do
+  defp dot_selector do
     gen all name_first <- name_first(),
             name_first != "",
             name_char <- name_char() do
-      "#{name_first}#{name_char}"
+      ".#{name_first}#{name_char}"
     end
   end
 
@@ -65,6 +64,6 @@ defmodule JsonPathAccessPropertyTest do
 
   # dot-wild-selector    = "." "*"            ;  dot followed by asterisk
   defp dot_wild_selector do
-    constant("*")
+    constant(".*")
   end
 end
