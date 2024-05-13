@@ -24,6 +24,23 @@ defmodule JsonPathAccessPropertyTest do
     end
   end
 
+  property "element index selector is returned as Access.at/1" do
+    check all fields <- list_of(one_of([dot_selector(), index_selector()]), min_length: 1) do
+      path = "$#{Enum.join(fields)}"
+
+      expected_fields =
+        Enum.map(fields, fn
+          "[" <> _rest = index_str ->
+            to_index_access(index_str)
+
+          "." <> name ->
+            name
+        end)
+
+      assert expected_fields == JsonPathAccess.to_access(path)
+    end
+  end
+
   # dot-selector    = "." dot-member-name
   # dot-member-name = name-first *name-char
   # name-first      =
@@ -65,5 +82,21 @@ defmodule JsonPathAccessPropertyTest do
   # dot-wild-selector    = "." "*"            ;  dot followed by asterisk
   defp dot_wild_selector do
     constant(".*")
+  end
+
+  # index-selector      = "[" S (quoted-member-name / element-index) S "]"
+  defp index_selector do
+    gen all index <- one_of([integer()]) do
+      "[#{index}]"
+    end
+  end
+
+  @element_index_re ~r/\[(?<index>[-+]?\d*)\]/
+  defp to_index_access(text) do
+    %{"index" => index} = Regex.named_captures(@element_index_re, text)
+
+    index
+    |> String.to_integer()
+    |> Access.at()
   end
 end
