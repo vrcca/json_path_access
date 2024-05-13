@@ -1,5 +1,5 @@
 defmodule JsonPathAccessPropertyTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   use ExUnitProperties
 
   property "passing a dot selector returns the list of fields" do
